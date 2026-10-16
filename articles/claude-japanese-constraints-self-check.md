@@ -2,7 +2,7 @@
 title: "「見直して」は効いたか？日本語の制約付き文章で採点基準・見直し・few-shotを2モデルで実測"
 emoji: "🧪"
 type: "tech"
-topics: ["claude", "claudecode", "agentsdk", "llm", "プロンプト"]
+topics: ["claude", "claudecode", "agentsdk", "llm", "prompt"]
 published: true
 ---
 
