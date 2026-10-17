@@ -12,7 +12,7 @@ published: false
 
 ## まず、2026年秋に何が発表されたか
 
-![2026年秋の主要AIモデル発表のタイムライン。9月22日Claude Opus 5.5、9月28日Claude Sonnet 5.5、9月Google Gemini 3.8 Flash／4 Argon、10月7日Claude Haiku 5.5とOpenAI GPT-6、10月14日OpenAIが旧GPT-4系の提供終了を告知](/images/ai2026autumn/fig1-timeline-b325720096.png)
+![2026年秋の主要AIモデル発表のタイムライン。9月22日Claude Opus 5.5、9月28日Claude Sonnet 5.5、9月Google Gemini 3.8 Flash／4 Argon、10月7日Claude Haiku 5.5とChatGPTでGPT-6 Sol／Lunaの提供開始（報道）、10月14日OpenAIが旧GPT-4系の提供終了を告知](/images/ai2026autumn/fig1-timeline-9615020290.png)
 
 この1か月の主な動きは次のとおりです。
 
@@ -22,7 +22,7 @@ published: false
 | 9月28日 | Claude Sonnet 5.5 | Anthropic |
 | 9月 | Gemini 3.8 Flash / Gemini 4 Argon ほか | Google |
 | 10月7日 | Claude Haiku 5.5 | Anthropic |
-| 10月7日 | GPT-6（Sol / Luna） | OpenAI |
+| 10月7日 | ChatGPTでGPT-6 Sol / Luna の提供開始（報道） | OpenAI |
 | 10月14日 | 旧GPT-4系のAPI提供終了を告知 | OpenAI |
 
 同じ時期に、フラッグシップ・中位・小型の全階層が更新され、さらに旧世代の「店じまい」の予定まで出てきた、というのがこの秋の特徴です。順番に見ていきます。
@@ -31,7 +31,7 @@ published: false
 
 一番インパクトが大きいのは、小型モデルの底上げです。
 
-Anthropicは10月7日にClaude Haiku 5.5を公表しました。同社は「これまでで最速のモデル」と位置づけ、要約・分類・データベース照会・問い合わせの一次対応といった大量処理向けだとしています。価格は100万トークンあたり、入力が$0.10〜$0.50、出力が$0.50〜$2.50で、プロンプトが10万トークン以下か超えるかで段階が変わります（10万トークン以下が下限の価格）。前世代のHaiku 4.5と比べて、約75%安くなったとされています。ある顧客の事例として、レイテンシが30%以上短縮し、エージェントの1ターンあたり最大2.5倍速くなったとも紹介されています。
+Anthropicは10月7日にClaude Haiku 5.5を公表しました。同社は「これまでで最速のモデル」と位置づけ、要約・分類・データベース照会・問い合わせの一次対応といった大量処理向けだとしています。価格は100万トークンあたり、入力が$0.10〜$0.50、出力が$0.50〜$2.50で、プロンプトが10万トークン以下か超えるかで段階が変わります（10万トークン以下が下限の価格）。前世代のHaiku 4.5と比べて、平均して約75%安く運用できるとされています（厳密には、10万トークン以下のリクエストでHaiku 4.5比90%安、10万トークン超で50%安という段階制で、ならすとおよそ75%安という水準です）。Asanaの事例として、同社が現在使っているモデルとの比較で、タスク完了のレイテンシが30%以上短縮し、エージェントの1ターンあたり最大2.5倍高速になったと紹介されています。
 
 出典: [Introducing Claude Haiku 5.5（Anthropic）](https://www.anthropic.com/claude-haiku-5-5)
 
@@ -45,7 +45,7 @@ Googleも9月に、Gemini 3.8 Flashを含む更新を発表しています。同
 
 「上位モデルは高いまま」という前提も、この秋に動きました。
 
-Anthropicは9月22日にClaude Opus 5.5を公表しています。価格は100万トークンあたり入力$4・出力$20で、これはOpus 5（入力$5・出力$25）より20%安い水準です。さらに「典型的な業務では、Opus 5より運用コストが40%低い」としています。性能面では、エージェント型のコーディング評価Terminal-Bench 4.0でOpus 5の52.3%に対して66.4%、出力生成はOpus 5より30%以上高速とされています。
+Anthropicは9月22日にClaude Opus 5.5を公表しています。同社はこれを「Claude 5.5ファミリー最初のモデル」と位置づけています。価格は100万トークンあたり入力$4・出力$20（Opus 5は入力$5・出力$25）で、「デフォルト設定での典型的な業務では、Opus 5より運用コストが40%低い」としています。性能面では、エージェント型のコーディング評価Terminal-Bench 4.0でOpus 5の52.3%に対して66.4%、出力生成はOpus 5より30%以上高速とされています。
 
 出典: [Claude Opus 5.5（Anthropic）](https://www.anthropic.com/news/claude-opus-5-5)
 
@@ -67,26 +67,45 @@ Claude 5.5ファミリーのトークン単価を並べると、同じファミ�
 
 新モデルの話題の裏で、業務システムにとってより重要なのが**旧モデルの提供終了**です。
 
-OpenAIは10月14日、旧GPT-4系モデルをAPIから削除する予定を告知しました。公式のdeprecationページによると、GPT-4o・GPT-4o mini・GPT-4.1・GPT-4.1 miniは2027年1月14日にAPIから提供終了となり、推奨の移行先はGPT-6（Luna）です。同じページには、ほかの世代の終了予定も載っています。
+OpenAIは公式のdeprecationページで、旧モデルをAPIから順次削除する予定を公開しています。2026年10月14日には旧GPT-4系（GPT-4o・GPT-4o mini・GPT-4.1・GPT-4.1 mini）の提供終了（2027年1月14日停止、推奨の移行先は `gpt-6-luna`）が告知され話題になりました。ただし業務システムにとってより急ぎなのは、さらに早く停止する次の2グループです。
 
-![OpenAIが告知した旧モデルの提供終了日のタイムライン。2027年1月6日に音声合成tts-1系、1月14日にGPT-4o／4o mini／GPT-4.1／4.1 mini、2月26日に文字起こしwhisper-1／gpt-4o-transcribe系、4月1日にGPT-5.1／5.3-codex／5.4-nano](/images/ai2026autumn/fig3-deprecation-c0650bccd8.png)
+- **2026年10月23日**（本記事公開から6日後）に、`gpt-4.1-nano`・`gpt-4o-2024-05-13`・`gpt-4-turbo`・`gpt-3.5-turbo-0125`・`o1`・`o3-mini`・`o4-mini`・`gpt-image-1` などが停止予定です（2026年4月に告知済み）。
+- **2026年12月11日**に、`gpt-5-2025-08-07`・`gpt-5-mini-2025-08-07`・`gpt-5-nano-2025-08-07`・`o3-2025-04-16` などが停止予定です（2026年6月に告知済み）。
 
-| 提供終了日 | 対象（API） | 推奨の移行先 |
+![OpenAIが告知した旧モデルの提供終了日のタイムライン。もっとも急ぎは2026年10月23日のgpt-4.1-nano／gpt-4o-2024-05-13／gpt-4-turbo／gpt-3.5-turbo-0125／o1／o3-mini／o4-mini／gpt-image-1ほか、次いで2026年12月11日のgpt-5-2025-08-07／gpt-5-mini／gpt-5-nano／o3ほか、2027年1月14日のGPT-4o／4o mini／GPT-4.1／4.1 miniほか](/images/ai2026autumn/fig3-deprecation-fed7534a4f.png)
+
+| 提供終了日 | 対象（API、代表例） | 推奨の移行先（例） |
 |---|---|---|
-| 2027年1月6日 | 音声合成 tts-1 / tts-1-hd 系 | gpt-realtime-2.1-mini |
-| 2027年1月14日 | GPT-4o / 4o mini / GPT-4.1 / 4.1 mini | gpt-6-luna |
-| 2027年2月26日 | 文字起こし whisper-1 / gpt-4o-transcribe 系 | gpt-live-transcribe ほか |
-| 2027年4月1日 | GPT-5.1 / 5.3-codex / 5.4-nano | gpt-6-sol / gpt-6-luna |
+| 2026年10月23日 | gpt-4.1-nano / gpt-4o-2024-05-13 / gpt-4-turbo / gpt-3.5-turbo-0125 / o1 / o3-mini / o4-mini / gpt-image-1 ほか | gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna（画像は gpt-image-2.5 系） |
+| 2026年12月11日 | gpt-5-2025-08-07 / gpt-5-mini-2025-08-07 / gpt-5-nano-2025-08-07 / o3-2025-04-16 ほか | gpt-5.6-sol / gpt-5.6-terra / gpt-5.6-luna |
+| 2027年1月14日 | gpt-4o / gpt-4o mini / gpt-4.1 / gpt-4.1 mini ほか | gpt-6-luna |
 
 出典: [Model deprecations（OpenAI 公式ドキュメント）](https://developers.openai.com/api/docs/deprecations)
 
-アプリやワークフローにモデルIDを直書きしていると、終了日を過ぎた瞬間に動かなくなります。チャット画面で使うだけなら自動で新モデルに切り替わりますが、**APIで業務システムに組み込んでいる場合は、終了日から逆算した移行計画が必要**です。「どのモデルIDを、どこで、いつまで使っているか」を棚卸しし、切り替え後に出力やコストが変わらないかを事前に確認しておくのが安全です。
+推奨の移行先はモデルごとに異なります（画像生成の `gpt-image-1` は `gpt-image-2.5` 系が案内されています）。アプリやワークフローにモデルIDを直書きしていると、終了日を過ぎた瞬間に動かなくなります。**APIで業務システムに組み込んでいる場合は、終了日から逆算した移行計画が必要**です。「どのモデルIDを、どこで、いつまで使っているか」を棚卸しし、切り替え後に出力やコストが変わらないかを事前に確認しておくのが安全です。
 
-なお、ここで挙げた日付は2026年10月14日時点の告知であり、今後変更される可能性があります。実装前に最新のdeprecationページで必ず確認してください。
+### 告知期間のルールを知っておく
+
+OpenAIは提供終了の告知期間（予告からシャットダウンまでの期間）の目安も定めています。一般提供（GA）モデルは最低6か月前、日付入りスナップショットや codex・deep research などの派生版は最低3か月前に告知され、preview モデルは2週間程度のより短い予告で終了することもあります。公式ドキュメントはこの告知期間を、「推奨の移行先モデルを評価し、アプリケーションの挙動をテストし、移行を完了するための時間を顧客に与えるもの」と説明しています。つまり、移行の検証に使える時間はモデルの種類によって大きく変わります。
+
+### 終了日はプログラムから確認できる
+
+各モデルの終了日は、手作業でページを見るだけでなくAPIからも取得できます。`GET /v1/models` で返る各モデルの `shutdown_date` フィールドに終了予定日（`YYYY-MM-DD` 形式、未定なら `null`）が入ります。
+
+```bash
+# 終了日が設定されているモデルだけを一覧する
+curl https://api.openai.com/v1/models \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  | jq '.data[] | select(.shutdown_date != null) | {id, shutdown_date}'
+```
+
+この確認を定期ジョブに組み込んでおくと、新たな終了予告の見落としを防げます。
+
+なお、ここで挙げた日付・モデルIDは2026年10月17日に確認した内容で、今後変更される可能性があります。実装前に最新のdeprecationページで必ず確認してください。
 
 ## おまけ：利用者向けUIも変わった
 
-開発者向けAPIだけでなく、一般利用者向けの画面も動いています。OpenAIは10月7日、ChatGPT向けにGPT-6を展開し始めました。報道（9to5Mac）によると、上位のGPT-6 SolはPlus・Pro・Business・Enterprise向け、軽量のGPT-6 LunaはFree・Go向けに提供されるとされています。あわせて「Intelligent UI」という仕組みが紹介され、回答内容に応じてテキストだけでなく図やボタン、フォーム、チャートなどを動的に組み合わせて表示する、と説明されています。
+開発者向けAPIだけでなく、一般利用者向けの画面も動いています。報道（9to5Mac）によると、GPT-6自体の最初のモデルは前月（9月）に発表済みで、10月7日にはChatGPT向けに、日常会話向けに調整したバージョンの展開が始まりました。上位のGPT-6 SolはPlus・Pro・Business・Enterprise向けに同日から、軽量のGPT-6 LunaはFree・Go向けに翌日から展開されるとされています。あわせて「Intelligent UI」という仕組みが紹介され、回答内容に応じてテキストだけでなく図やボタン、フォーム、チャートなどを動的に組み合わせて表示する、と説明されています。
 
 出典: [OpenAI brings GPT-6 to ChatGPT and debuts Intelligent UI（9to5Mac）](https://9to5mac.com/2026/10/07/openai-brings-gpt-6-to-chatgpt-and-debuts-intelligent-ui/)
 
@@ -110,14 +129,14 @@ OpenAIは10月14日、旧GPT-4系モデルをAPIから削除する予定を告�
 
 ### 3. 乗り換え時は「測ってから」切り替える
 
-安く・速くなったからといって、出力の質や形式が自社の用途でそのまま通用するとは限りません。新モデルに切り替える前に、既存モデルと新モデルで同じ入力を流し、出力・コスト・所要時間を比べてから本番に入れるのが安全です。公式ドキュメントでも、あるモデル向けの手法を別モデルにそのまま当てはめる前に、自分のデータで検証するよう勧められています。
+安く・速くなったからといって、出力の質や形式が自社の用途でそのまま通用するとは限りません。新モデルに切り替える前に、既存モデルと新モデルで同じ入力を流し、出力・コスト・所要時間を比べてから本番に入れるのが安全です。OpenAIも、提供終了の告知期間は「推奨の移行先モデルを評価し、アプリケーションの挙動をテストし、移行を完了するための時間」を確保するためのものだと説明しています。この猶予を使って、自社の入力で挙動とコストを確かめてから切り替えましょう。
 
 ## まとめ
 
 - 2026年秋はフラッグシップ・中位・小型の全階層が更新された
-- 小型モデル（Haiku 5.5、Gemini Flash系）が実用水準かつ激安になり、大量処理の単価が下がった
-- フラッグシップも値下げ・高速化（Opus 5.5は運用コスト40%減、Sonnet 5.5は30%以上高速）し、エージェントや長時間タスクが現実的に
-- OpenAIは旧GPT-4系を2027年1月14日にAPIから提供終了。業務システムは移行計画が必要
+- 小型モデル（Haiku 5.5、Gemini Flash系）が実用水準かつ激安になり、大量処理の単価が下がった（Haiku 5.5はHaiku 4.5比で平均約75%安）
+- フラッグシップも値下げ・高速化（Opus 5.5はデフォルト設定の典型業務でOpus 5比40%低コスト、Sonnet 5.5は30%以上高速）し、エージェントや長時間タスクが現実的に
+- OpenAIは旧モデルのAPI提供終了を段階的に進行中。直近は2026年10月23日・12月11日停止分で、業務システムは移行計画と棚卸しが必要（`GET /v1/models` の `shutdown_date` で終了日を確認できる）
 - タスクをモデル帯で仕分け、モデルの入れ替えを前提に組み、乗り換えは測ってから
 
 新しいモデルを追いかけることより、「自社のどの業務から試し、どう測り、どう広げるか」を決めるほうが先です。進め方の型は[中小企業がAI導入で最初にやるべき5つのステップ](https://ai.sanvia.co.jp/articles/first-steps)に、業務別の使いどころは[業務別・生成AIの活用アイデア集](https://ai.sanvia.co.jp/articles/use-cases-by-task)にまとめています。自社がどこから手をつけるとよいか迷う場合は、[AIみちしるべのAI導入診断](https://ai.sanvia.co.jp/diagnosis)（全8問・約3分、登録不要・無料）で現状を整理できます。
@@ -128,7 +147,7 @@ OpenAIは10月14日、旧GPT-4系モデルをAPIから削除する予定を告�
 - Anthropic「Claude Sonnet 5.5」 https://www.anthropic.com/news/claude-sonnet-5-5 （2026年9月28日 / 確認日：2026年10月17日）
 - Anthropic「Introducing Claude Haiku 5.5」 https://www.anthropic.com/claude-haiku-5-5 （2026年10月7日 / 確認日：2026年10月17日）
 - Google「The latest AI news we announced in September 2026」 https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-september-2026/ （2026年9月 / 確認日：2026年10月17日）
-- OpenAI「Model deprecations」（公式ドキュメント） https://developers.openai.com/api/docs/deprecations （告知：2026年10月14日 / 確認日：2026年10月17日）
+- OpenAI「Model deprecations」（公式ドキュメント） https://developers.openai.com/api/docs/deprecations （旧GPT-4系の告知：2026年10月14日 / 確認日：2026年10月17日）
 - 9to5Mac「OpenAI brings GPT-6 to ChatGPT and debuts Intelligent UI」 https://9to5mac.com/2026/10/07/openai-brings-gpt-6-to-chatgpt-and-debuts-intelligent-ui/ （2026年10月7日 / 確認日：2026年10月17日）
 
 （AIみちしるべ編集部 / 株式会社SANVIA）
