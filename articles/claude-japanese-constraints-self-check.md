@@ -3,7 +3,7 @@ title: "「見直して」は効いたか？日本語の制約付き文章で採
 emoji: "🧪"
 type: "tech"
 topics: ["claude", "claudecode", "agentsdk", "llm", "prompt"]
-published: true
+published: false
 ---
 
 ![表紙](/images/a6b5a060ff/cover.png)
