@@ -10,6 +10,9 @@ published: false
 
 ベンチマークの順位争いではなく、「自社のどの業務に、どのモデルを、いつまで使えるのか」を判断するための材料として読んでください。価格や日付はすべて出典を明記しています。
 
+![作業台で、使い込まれた大きく重い旧式のスパナを段ボール箱にしまう手元。箱の手前にはコンパクトな折りたたみ式マルチツールが置かれている](/images/ai2026autumn/hero-7840e084c9.jpg)
+*イメージ画像（生成AIで作成）*
+
 ## まず、2026年秋に何が発表されたか
 
 ![2026年秋の主要AIモデル発表のタイムライン。9月22日Claude Opus 5.5、9月28日Claude Sonnet 5.5、9月Google Gemini 3.8 Flash／4 Argon、10月7日Claude Haiku 5.5とChatGPTでGPT-6 Sol／Lunaの提供開始（報道）、10月14日OpenAIが旧GPT-4系の提供終了を告知](/images/ai2026autumn/fig1-timeline-9615020290.png)
