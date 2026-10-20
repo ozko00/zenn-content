@@ -3,7 +3,7 @@ title: "Claude Codeをヘッドレスで回すときのstream-jsonログの読�
 emoji: "🪵"
 type: "tech"
 topics: ["claudecode", "claude", "llm", "cli", "python"]
-published: false
+published: true
 ---
 
 Claude Code を `claude -p --output-format stream-json --verbose` で毎日自動実行していると、1実行につき数百行の JSON ログが溜まります。この記事では、その stream-json ログの**行の種類と各フィールドの意味**を公式ドキュメントで確認しながら、**完了した実行だけを抜き出して集計する小さな Python スクリプト**を作り、手元の実ログ 42 実行に対して実際に流した出力をそのまま載せます。数値はすべてこのスクリプトの出力から転記しています。
@@ -14,7 +14,7 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 
 - 集計に使う数値は、ログ末尾の `type:"result"` 行と先頭の `system/init` 行にほぼ集約されている。
 - 完了判定は「`result` 行があり、かつ `num_turns >= 1`」で十分。114 ファイルのうち `result` 行が無い（実行中/中断）のが 62 ファイル。残り 52 ファイルが `result` 行を持ち、うち **42 ファイルが完了実行**（今回は 1 ファイル 1 実行）で成功 35・`is_error:true` 7、残り 10 ファイルは `num_turns == 0` の空 `result`（空 `result` 行自体は 19）だった。
-- 入力トークンの 97〜99% はプロンプトキャッシュの読み出しだった（成功 35 実行の中央値 98.59%）。
+- 成功 35 実行のキャッシュ読み出し率は中央値 98.59%（範囲 92.1〜99.8%）。入力トークンのほとんどがプロンプトキャッシュの読み出しだった。
 
 料金そのものの集計（API換算額の内訳）は別記事（[AIみちしるべ: Claude Code 料金](https://ai.sanvia.co.jp/articles/claude-code-pricing)）でやっているので、ここでは**ログの読み方と集計の作り方**に絞ります。
 
@@ -374,7 +374,7 @@ overall (success runs):
 
 ### 入力トークンはほぼキャッシュ読み出し
 
-一番はっきり出たのはこれです。`usage` の内訳を見ると、入力トークンの大半は `cache_read_input_tokens`（キャッシュ読み出し）でした。成功 35 実行の `cache_read` 率は中央値 98.59%（最小 92.1%・最大 99.8%）。ジョブ種別で合計しても 97〜99% がキャッシュ読み出しです。
+一番はっきり出たのはこれです。`usage` の内訳を見ると、入力トークンの大半は `cache_read_input_tokens`（キャッシュ読み出し）でした。成功 35 実行の `cache_read` 率は中央値 98.59%（最小 92.1%・最大 99.8%）。下図の 4 種別（n≥3）で合計すると 97.5〜99.2% がキャッシュ読み出しです。
 
 ![入力トークンの内訳を100%積み上げ横棒で示した図。新規入力は各ジョブ0.1%未満・キャッシュ書込も数%で棒はほとんど見えず、日次ジョブ(daily)99.1%・種別不明99.2%・速報(breaking)97.8%・note系(note)97.5%がキャッシュ読み出し](/images/cc-headless-logs/fig2-tokens-bad224cd98.png)
 
@@ -406,7 +406,7 @@ overall (success runs):
 
 ### Q. `is_error` が true でも `subtype` が "success" のことがあるのはなぜですか
 
-矛盾ではありません。`SDKResultMessage` 型では、`subtype: "success"` のアーム自体に `is_error: boolean` フィールドが定義されています（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）。`subtype` は `success` / `error_max_turns` / `error_during_execution` / `error_max_budget_usd` / `error_max_structured_output_retries` のどれかで、`success` は「最大ターン数や予算上限などの打ち切り条件に当たらなかった」ことを表すにすぎず、その上で `is_error` が別途エラー状態を示します。今回の `is_error:true` の 7 実行は、いずれも `subtype:"success"`・`terminal_reason:"completed"` で、`api_error_status` は 1 件が `429`、残り 6 件が `null` でした（列挙値・数値フィールドのみ集計。エラーメッセージ本文は読んでいません）。`429` の 1 件は API エラー（HTTP 429）で終了したと読めますが、`null` の 6 件がなぜ `is_error:true` かはドキュメントから特定できないため推測しません。集計では `is_error` を成功判定の基準にしておくのが無難です。
+矛盾ではありません。`SDKResultMessage` 型では、`subtype: "success"` のアーム自体に `is_error: boolean` フィールドが定義されており（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）、型定義上は両立しえます（`subtype` の値は `success` / `error_max_turns` / `error_during_execution` / `error_max_budget_usd` / `error_max_structured_output_retries`）。今回の `is_error:true` の 7 実行は、いずれも `subtype:"success"`・`terminal_reason:"completed"` で、`api_error_status` は 1 件が `429`、残り 6 件が `null` でした（列挙値・数値フィールドのみ集計。エラーメッセージ本文は読んでいません）。`api_error_status` は「会話を終了させた API エラーの HTTP ステータス」なので、`429` の 1 件は API エラー（HTTP 429）で終了したと読めますが、`null` の 6 件がなぜ `is_error:true` かはドキュメントから特定できないため推測しません。集計では `is_error` を成功判定の基準にしておくのが無難です。
 
 ### Q. `total_cost_usd` を合計すれば請求額になりますか
 
@@ -429,4 +429,4 @@ overall (success runs):
 
 ---
 
-筆者: Kosuke。AIみちしるべ（[https://ai.sanvia.co.jp](https://ai.sanvia.co.jp)）を運営しています。Claude Code の料金・使い方の実測記事も書いています（[著者ページ](https://ai.sanvia.co.jp/authors/kosuke)）。この記事の集計スクリプトと生出力（数値のみの CSV/JSON）は手元に保存してあり、本文のスクリプトと同一です。
+筆者: Kosuke。AIみちしるべ（[https://ai.sanvia.co.jp](https://ai.sanvia.co.jp)）を運営しています。[Claude Code の料金を実測した記事](https://ai.sanvia.co.jp/articles/claude-code-pricing)も書いています（[著者ページ](https://ai.sanvia.co.jp/authors/kosuke)）。この記事の集計スクリプトと生出力（数値のみの CSV/JSON）は手元に保存してあり、本文のスクリプトと同一です。
