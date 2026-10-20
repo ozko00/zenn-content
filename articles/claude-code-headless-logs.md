@@ -13,14 +13,14 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 対象は、同一マシンで動かした `*.jsonl` ログ 114 ファイル（Claude Code v2.1.197）。結論だけ先に:
 
 - 集計に使う数値は、ログ末尾の `type:"result"` 行と先頭の `system/init` 行にほぼ集約されている。
-- 完了判定は「`result` 行があり、かつ `num_turns >= 1`」で十分。`result` 行が無いログ（実行中/中断）が 62 件、`num_turns == 0` の空の `result` 行が 19 件あり、これらを除くと**完了実行は 42**（成功 35・エラー 7）だった。
+- 完了判定は「`result` 行があり、かつ `num_turns >= 1`」で十分。114 ファイルのうち `result` 行が無い（実行中/中断）のが 62 ファイル。残り 52 ファイルが `result` 行を持ち、うち **42 ファイルが完了実行**（今回は 1 ファイル 1 実行）で成功 35・`is_error:true` 7、残り 10 ファイルは `num_turns == 0` の空 `result`（空 `result` 行自体は 19）だった。
 - 入力トークンの 97〜99% はプロンプトキャッシュの読み出しだった（成功 35 実行の中央値 98.59%）。
 
 料金そのものの集計（API換算額の内訳）は別記事（[AIみちしるべ: Claude Code 料金](https://ai.sanvia.co.jp/articles/claude-code-pricing)）でやっているので、ここでは**ログの読み方と集計の作り方**に絞ります。
 
 ## stream-json ログの構造
 
-`--output-format stream-json` は、1行ごとに1つの JSON オブジェクトを吐く newline-delimited JSON です（[公式: Run Claude Code programmatically](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。各行は `type` フィールドで区別します。代表的な実行ログ1件（日次改善タスク）の行の内訳は次の通りでした。
+`--output-format stream-json` は、1行ごとに1つの JSON オブジェクトを吐く newline-delimited JSON です（[公式: Run Claude Code programmatically](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。各行は `type` フィールドで区別します。代表的な実行ログ1件（日次ジョブ（daily）の1実行）の行の内訳は次の通りでした。
 
 | type | 件数 | 中身 |
 |---|---|---|
@@ -32,7 +32,7 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 
 並びは「先頭に `system/init` が1行 → `assistant`／`user` のツール実行ループが本体 → 末尾に `result` が1行」という形です。公式ドキュメントも「The last line of the stream is a `result` message with the final response text, cost, and session metadata」「The `system/init` event ... is the first event in the stream」と書いています（[headless](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。
 
-![stream-jsonの行の流れの模式図。左のsystem/init（model・version・permissionMode）から、中央のassistantとuserのツール実行ループ（systemやrate_limit_eventを含む）を経て、右のresult（num_turns・duration・usage・cost）へ矢印が伸びる。集計に使うのは先頭initと末尾resultの数値だけ](/images/cc-headless-logs/fig3-flow-714474f1e6.png)
+![stream-jsonの行の流れの模式図。左のsystem/init（model・version・permissionMode）から、中央のassistantとuserのツール実行ループ（systemやrate_limit_eventを含む）を経て、右のresult（num_turns・duration・usage・cost）へ矢印が伸びる。集計に使うのは先頭initと末尾resultの数値だけ](/images/cc-headless-logs/fig3-flow-13f61f2630.png)
 
 ### 先頭の `system/init` 行
 
@@ -50,7 +50,7 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 - `permissionMode`: 権限モード。今回の対象ログはすべて `bypassPermissions`（＝人の承認を挟まない無人実行）でした。
 - `claude_code_version`: Claude Code の版。今回は全ログ `2.1.197`。手元の `claude --version` も `2.1.197 (Claude Code)` でした。
 
-`model` は `/docs/en/cli-reference` の `--model`、`permissionMode` は権限モードに対応します。`system/init` が何を含むかは [headless の "Read session metadata"](https://code.claude.com/docs/en/headless)（確認日 2026-10-20）に説明があります。
+`model` は [CLI reference](https://code.claude.com/docs/en/cli-reference) の `--model`、`permissionMode` は権限モードに対応します。`system/init` が何を含むかは [headless の "Read session metadata"](https://code.claude.com/docs/en/headless)（確認日 2026-10-20）に説明があります。
 
 ### 末尾の `result` 行
 
@@ -72,7 +72,7 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 
 | フィールド | 意味 |
 |---|---|
-| `subtype` | `success` / `error_max_turns` / `error_during_execution` |
+| `subtype` | `success` / `error_max_turns` / `error_during_execution` / `error_max_budget_usd` / `error_max_structured_output_retries` |
 | `is_error` | エラー終了かどうかの真偽値 |
 | `num_turns` | エージェントのターン数（ツール往復の回数） |
 | `duration_ms` | 実行全体の実時間（ミリ秒） |
@@ -85,9 +85,18 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 | `total_cost_usd` | **API換算の推定額**（後述） |
 | `permission_denials` | 却下されたツール呼び出し |
 
-`modelUsage` の各モデルは `inputTokens` / `outputTokens` / `cacheReadInputTokens` / `cacheCreationInputTokens` / `costUSD` 等を持ちます。主モデルに加えてサブエージェント用のモデル（今回は `claude-haiku-4-5-20251001`）が入ることがあるので、これでサブエージェントの利用分を切り分けられます。
+`modelUsage` の各モデルは `inputTokens` / `outputTokens` / `cacheReadInputTokens` / `cacheCreationInputTokens` / `costUSD` 等を持ちます。主モデルに加えて別のモデル（今回は `claude-haiku-4-5-20251001`）が入ることがあるので、主モデル以外の利用分を切り分けられます。docs によれば `modelUsage` は主ループに加えサブエージェントや compaction 等の内部呼び出しも含みます（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）。
 
-なお、`fast_mode_state`・`terminal_reason`・`ttft_ms`・`api_error_status`・`iterations`・`service_tier` といったフィールドもログ上には観測されましたが、上記ドキュメントに明記を確認できなかったため、ここでは意味を推測しません（「ログで観測した」事実のみ）。
+`result` 行にはこのほか診断用のフィールドがあり、[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript) の「Several fields on the result carry diagnostic detail beyond `subtype`」節に定義があります（確認日 2026-10-20）。ログで観測したものを docs と突き合わせると:
+
+- `terminal_reason`: ループが終わった理由の列挙（`completed` / `max_turns` / `api_error` など）。
+- `api_error_status`: 会話を終了させた API エラーの HTTP ステータスコード。API エラーなく終わったときは `null` または省略。
+- `ttft_ms`: 最初のトークンまでの時間（ミリ秒）。success アームのみ。`ttft_stream_ms` は最初の `message_start` までの時間。
+- `stop_reason`: モデル側の停止理由（文字列 or `null`）。
+- `fast_mode_state`: `on` / `off` / `cooldown`。
+- `usage` 内の `service_tier`（`standard` / `priority` / `batch` / `null`）、`iterations`、`server_tool_use` もドキュメントに定義があります。
+
+一方、ログに現れた `time_to_request_ms` は、上記ドキュメントで定義を確認できませんでした（`request_sent_wall_ms` 等は定義あり）。確認できないフィールドは意味を推測しません。
 
 ### `total_cost_usd` はあくまで推定値
 
@@ -108,8 +117,9 @@ Claude Code を `claude -p --output-format stream-json --verbose` で毎日自�
 先頭の `system/init` 行の model / version / permissionMode だけを読む。
 プロンプト本文・ツール入出力・ファイル内容などは一切読まない。
 完了済み（result 行があり、num_turns>=1 ＝実作業が1ターン以上ある）実行だけを
-対象にする。result 行が無いログ（＝実行中 or 中断）と、num_turns==0 の退化した
-result 行（再開直後の空実行・中断など）は件数だけ数えて除外する。
+対象にする。result 行が無いログ（＝実行中 or 中断）と、num_turns==0 の空の
+result 行（docs ではキューされたバックグラウンドタスク完了で生じうると説明）は
+件数だけ数えて除外する。
 
 出力: 標準出力に要約、同じフォルダに runs.csv と summary.json。
 """
@@ -126,7 +136,7 @@ def classify(stem: str) -> str:
     ファイル名トークンだけで判断し、タスク内容までは推測しない。"""
     s = stem.lower()
     if "daily" in s:
-        return "daily"            # 日次改善
+        return "daily"            # 日次ジョブ(daily)
     if "note" in s:
         return "note"             # note 記事
     if "breaking" in s:
@@ -313,11 +323,13 @@ if __name__ == "__main__":
     main()
 ```
 
-ジョブ種別は**ファイル名のトークン**（`daily` / `note` / `breaking` など）だけで決め、タスクの中身までは推測しません。該当トークンが無いファイル（反復の検証ランなど）は `other`（種別不明）に寄せています。
+ジョブ種別は**ファイル名のトークン**（`daily` / `note` / `breaking` など）だけで決め、タスクの中身までは推測しません。判定は上から順（`daily`→`note`→`breaking`→`weekly`→`zenn`→`article`）で、最初に当たったトークンを採用します。したがって `cc_note_breaking_*` は `note` に分類されます。該当トークンが無いファイル（反復の検証ランなど）は `other`（種別不明）に寄せています。
+
+注意として、このラベルは**ファイル名トークンでの粗い分類**であり、同じラベルでも中身は一様ではありません。たとえば `daily` には、命名の違う 2 系統（`cc_daily_*` と `claude_daily_*`）が混在します。以下では「日次ジョブ（daily）」のように、ファイル名トークンでまとめたものだと分かる呼び方をします。
 
 ## 実ログに流した結果
 
-上のスクリプトを、同一マシンのログ置き場2か所（`*.jsonl` が 114 ファイル）に対して実行した生出力がこれです。以下の数値はすべてこの出力からの転記です（2026-10-20 時点のスナップショット。ログは実行のたびに増えるので、後から流すと `scanned files` や除外件数は変わります。ただし下の完了実行42件の分析は同じ結果になります）。
+上のスクリプトを、同一マシンのログ置き場2か所（`*.jsonl` が 114 ファイル）に対して実行した生出力がこれです。以下の数値はすべてこの出力からの転記です（2026-10-20 時点のスナップショット。ログは実行のたびに増えるので、後から流すと `scanned files`・除外件数・完了実行数・各中央値のいずれも変わりえます）。
 
 ```text
 scanned files        : 114
@@ -349,38 +361,38 @@ overall (success runs):
 
 読み取れること（`article` と `weekly` は n=1 なので中央値ではなく1件の値です）:
 
-- **何件が集計対象か**が明確になる。114 ファイルのうち 62 は `result` 行が無い（実行中か中断）、19 は `num_turns==0` の空 `result`。残り 42 が完了実行で、うち 35 が成功、7 が `is_error:true`。
+- **何件が集計対象か**が明確になる。114 ファイルのうち 62 は `result` 行が無い（実行中か中断）。残り 52 ファイルが `result` 行を持ち、そのうち 42 ファイルは `num_turns>=1` の完了実行（今回は 1 ファイル 1 実行）、10 ファイルは `num_turns==0` の空 `result` しか持ちません（空 `result` 行の総数は 19＝同じファイルに複数出ることがある）。完了 42 のうち 35 が成功、7 が `is_error:true`。
 - **主モデルは混在**。`claude-sonnet-5` 29・`claude-opus-4-8` 12・`claude-opus-5` 1。モデル間の厳密比較が目的ではなく、「同一環境のログをどう読むか」の例です。
 
 ### ジョブ種別ごとのターン数と実時間
 
 `num_turns` が多い実行ほど実時間も長い、という素直な関係が出ました（n≥3 のジョブのみ図示）。
 
-![ジョブ種別ごとのターン数と実時間の中央値の棒グラフ。日次改善は69ターン・30分、速報は95ターン・27分、種別不明の検証ランは49ターン・11分、note記事は38ターン・8分](/images/cc-headless-logs/fig1-jobs-1689160c83.png)
+![ジョブ種別ごとのターン数と実時間の中央値の棒グラフ。日次ジョブ(daily)は69ターン・30分、速報(breaking)は95ターン・27分、種別不明の検証ランは49ターン・11分、note系(note)は38ターン・8分](/images/cc-headless-logs/fig1-jobs-87a1ff473c.png)
 
-`api/wall`（＝`duration_api_ms` / `duration_ms`）は、実時間のうちどれだけが API 待ちだったかの目安です。note（0.97）や週次（0.98）のようにツール実行が軽い実行はほぼ API 時間で占められ、日次改善（0.51）のようにローカルのツール実行（ファイル編集・コマンド）が多い実行は半分程度でした。
+`api/wall`（＝`duration_api_ms` / `duration_ms`）は、実時間のうち API 呼び出しに費やした割合です（`duration_api_ms` の定義より）。note（0.97）や週次（0.98）はほぼ API 時間で占められ、日次ジョブ（daily, 0.51）は API 待ち以外の時間（ツール実行など）が実時間の約半分を占めていました。
 
 ### 入力トークンはほぼキャッシュ読み出し
 
 一番はっきり出たのはこれです。`usage` の内訳を見ると、入力トークンの大半は `cache_read_input_tokens`（キャッシュ読み出し）でした。成功 35 実行の `cache_read` 率は中央値 98.59%（最小 92.1%・最大 99.8%）。ジョブ種別で合計しても 97〜99% がキャッシュ読み出しです。
 
-![入力トークンの内訳を100%積み上げ横棒で示した図。新規入力とキャッシュ書込はごくわずかで、日次改善99.1%・種別不明99.2%・速報97.8%・note記事97.5%がキャッシュ読み出し](/images/cc-headless-logs/fig2-tokens-45a7d6911b.png)
+![入力トークンの内訳を100%積み上げ横棒で示した図。新規入力は各ジョブ0.1%未満・キャッシュ書込も数%で棒はほとんど見えず、日次ジョブ(daily)99.1%・種別不明99.2%・速報(breaking)97.8%・note系(note)97.5%がキャッシュ読み出し](/images/cc-headless-logs/fig2-tokens-bad224cd98.png)
 
 長い自動実行では会話履歴が毎リクエスト送られ、その大半がプロンプトキャッシュから読み直されるため、こうなります（背景は [Prompt caching](https://code.claude.com/docs/en/prompt-caching)、確認日 2026-10-20）。新規入力トークンは全体の 0.1% 未満でした。
 
-### サブエージェント（haiku）の利用
+### 主モデル以外のモデル（サブエージェント等）
 
-`modelUsage` に主モデル以外のモデルが現れた実行は 35 中 19。ただし、そのサブエージェント・モデルが生成した**出力トークンの割合**は中央値 0.24%（最大でも 10.2%）でした。サブエージェントは検索や検証など「読む」側に使われ、最終出力の大半は主モデルが書いている、という形が数字に出ています。公式も「choose a smaller model for a subagent」でコストを抑える方法を案内しています（[costs](https://code.claude.com/docs/en/costs)、確認日 2026-10-20）。
+`modelUsage` に主モデル以外のモデルが現れた実行は 35 中 19。ただし、その主モデル以外のモデルが生成した**出力トークンの割合**は中央値 0.24%（最大でも 10.2%）でした。言えるのは「出力トークンの大半は主モデルのもの」というところまでで、そのモデルが具体的に何に使われたかはログの数値からは分かりません。公式は「choose a smaller model for a subagent」でサブエージェントに小さいモデルを割り当ててコストを抑える方法を案内しています（[costs](https://code.claude.com/docs/en/costs)、確認日 2026-10-20）。
 
 ## 自分のログで試すときのコツ
 
-- ログの収集は `claude -p "<task>" --output-format stream-json --verbose > run.jsonl` のようにリダイレクトするだけ。CI やスクリプトでは `--bare` を付けると host の hooks や CLAUDE.md を読み込まずに再現性が上がります（[headless](https://code.claude.com/docs/en/headless)）。
-- 集計では**まず件数を数える**。「`result` 行がある」「`num_turns >= 1`」の2条件で、実行中・中断・空実行を落とすのが実務的です。これを飛ばすと、中央値が 0 に引っ張られます（筆者も最初に `num_turns==0` の行を入れてしまい、日次改善の中央値が全部 0 になりました）。
+- ログの収集は `claude -p "<task>" --output-format stream-json --verbose > run.jsonl` のようにリダイレクトするだけ。CI やスクリプトでは `--bare` を付けると、hooks・skills・カスタムコマンド・サブエージェント・プラグイン・MCP サーバー・auto memory・CLAUDE.md の自動読み込みをスキップして起動が速くなります（スクリプト／SDK 呼び出しで推奨されるモード。[headless](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。
+- 集計では**まず件数を数える**。「`result` 行がある」「`num_turns >= 1`」の2条件で、実行中・中断・空実行を落とすのが実務的です。`num_turns==0` の空 `result` を含めると、中央値がゼロ側に引っ張られます。
 - 金額は `total_cost_usd` を鵜呑みにしない。推定値であること（前述の公式引用）を踏まえ、請求は Console の Usage ページで確認します。
 
 ## 限界
 
-- サンプルは完了実行 42（成功 35）のみ。同一マシン・同一運用のログで、主モデルが混在（sonnet/opus）し、タスク内容もジョブ種別ごとに違います。一般化はできません。
+- サンプルは完了実行 42（成功 35）のみ。同じ環境・同じ Claude Code 版（v2.1.197）で集めたログですが、主モデルが混在（sonnet/opus）し、タスク内容もジョブ種別ごと・ファイルごとに違います。一般化はできません。
 - `other`（17 件）はファイル名から種別を特定できない反復の検証ランで、タスクの中身は不明です（意味づけしていません）。`article`・`weekly` は各 1 件で、中央値ではなく単一の値です。
 - `total_cost_usd` は API 換算の推定値で、請求額ではありません。サブスク（Pro/Max）では使用枠に対して消費され、ドル請求とは別です（[costs](https://code.claude.com/docs/en/costs)）。
 - ログに現れても公式ドキュメントで確認できなかったフィールドは、意味を推測していません。
@@ -390,11 +402,11 @@ overall (success runs):
 
 ### Q. 実行が完了したかどうかは、どのフィールドで判断すればいいですか
 
-末尾に `type:"result"` 行があるかどうかです。SIGTERM で止めた実行は `result` を残さないと公式に明記されています（[headless の "Stop a run with SIGTERM"](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。加えて、再開直後などに `num_turns:0` の空の `result` 行が出ることがあるため、実務では「`result` があり `num_turns >= 1`」を完了条件にすると安全です（今回 19 件がこの空 `result` でした）。
+末尾に `type:"result"` 行があるかどうかです。SIGTERM で止めた実行は `result` を残さないと公式に明記されています（[headless の "Stop a run with SIGTERM"](https://code.claude.com/docs/en/headless)、確認日 2026-10-20）。また、`num_turns:0` の空の `result` 行が出ることがあります。ドキュメントには「複数のバックグラウンドタスク完了がまとめてキューされると、Claude Code はそれらを 1 ターンで応答でき、最後の 1 つを除く各完了は `num_turns: 0` の空の結果を順に出す」という記述があります（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）。今回のログにも空 `result` が 19 行ありましたが、それがこのケースに当たるかは数値フィールドだけからは確認できません。いずれにせよ実務では「`result` があり `num_turns >= 1`」を完了条件にすると安全です。
 
 ### Q. `is_error` が true でも `subtype` が "success" のことがあるのはなぜですか
 
-今回のログでは `is_error:true` の 7 実行が、いずれも `subtype:"success"` のまま残っていました。`subtype` の定義値は `success` / `error_max_turns` / `error_during_execution`、`is_error` は「エラー終了かどうかの真偽値」です（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）。両者が食い違う理由はドキュメントで確認できなかったため推測しませんが、集計では `is_error` を成功判定の基準にしておくのが無難です。
+矛盾ではありません。`SDKResultMessage` 型では、`subtype: "success"` のアーム自体に `is_error: boolean` フィールドが定義されています（[Agent SDK: TypeScript](https://code.claude.com/docs/en/agent-sdk/typescript)、確認日 2026-10-20）。`subtype` は `success` / `error_max_turns` / `error_during_execution` / `error_max_budget_usd` / `error_max_structured_output_retries` のどれかで、`success` は「最大ターン数や予算上限などの打ち切り条件に当たらなかった」ことを表すにすぎず、その上で `is_error` が別途エラー状態を示します。今回の `is_error:true` の 7 実行は、いずれも `subtype:"success"`・`terminal_reason:"completed"` で、`api_error_status` は 1 件が `429`、残り 6 件が `null` でした（列挙値・数値フィールドのみ集計。エラーメッセージ本文は読んでいません）。`429` の 1 件は API エラー（HTTP 429）で終了したと読めますが、`null` の 6 件がなぜ `is_error:true` かはドキュメントから特定できないため推測しません。集計では `is_error` を成功判定の基準にしておくのが無難です。
 
 ### Q. `total_cost_usd` を合計すれば請求額になりますか
 
@@ -403,6 +415,17 @@ overall (success runs):
 ### Q. キャッシュ読み出しが 98% もあるのは異常ですか
 
 いいえ。長い自動実行では会話履歴を毎リクエスト送るため、その大半がプロンプトキャッシュから読み直されます（[Prompt caching](https://code.claude.com/docs/en/prompt-caching) / [costs の "Why usage climbs in a long session"](https://code.claude.com/docs/en/costs)、確認日 2026-10-20）。今回の成功 35 実行でも 92〜99.8% の範囲に収まりました。むしろキャッシュ読み出し率が極端に低い実行があれば、キャッシュミス（セッションを空けすぎた等）を疑う手がかりになります。
+
+## 参考資料
+
+いずれも本文で参照した一次ソース。公式ドキュメントの各ページは公表日の表示がないため「公表日: 不明」。
+
+- Run Claude Code programmatically（headless）— Anthropic（code.claude.com/docs）— https://code.claude.com/docs/en/headless — 公表日: 不明 — 確認日: 2026-10-20
+- Manage costs effectively（costs）— Anthropic — https://code.claude.com/docs/en/costs — 公表日: 不明 — 確認日: 2026-10-20
+- Agent SDK reference: TypeScript（`SDKResultMessage` 等の型定義）— Anthropic — https://code.claude.com/docs/en/agent-sdk/typescript — 公表日: 不明 — 確認日: 2026-10-20
+- CLI reference — Anthropic — https://code.claude.com/docs/en/cli-reference — 公表日: 不明 — 確認日: 2026-10-20
+- Prompt caching — Anthropic — https://code.claude.com/docs/en/prompt-caching — 公表日: 不明 — 確認日: 2026-10-20
+- Claude Code 料金（自サイトの実測記事）— AIみちしるべ（株式会社SANVIA）— https://ai.sanvia.co.jp/articles/claude-code-pricing — 公表日: 不明 — 確認日: 2026-10-20
 
 ---
 
