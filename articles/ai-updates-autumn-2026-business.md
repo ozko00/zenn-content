@@ -142,7 +142,7 @@ curl https://api.openai.com/v1/models \
 - OpenAIは旧モデルのAPI提供終了を段階的に進行中。直近は2026年10月23日・12月11日停止分で、業務システムは移行計画と棚卸しが必要（`GET /v1/models` の `shutdown_date` で終了日を確認できる）
 - タスクをモデル帯で仕分け、モデルの入れ替えを前提に組み、乗り換えは測ってから
 
-新しいモデルを追いかけることより、「自社のどの業務から試し、どう測り、どう広げるか」を決めるほうが先です。進め方の型は[中小企業がAI導入で最初にやるべき5つのステップ](https://ai.sanvia.co.jp/articles/first-steps)に、業務別の使いどころは[業務別・生成AIの活用アイデア集](https://ai.sanvia.co.jp/articles/use-cases-by-task)にまとめています。自社がどこから手をつけるとよいか迷う場合は、[AIみちしるべのAI導入診断](https://ai.sanvia.co.jp/diagnosis)（全8問・約3分、登録不要・無料）で現状を整理できます。
+新しいモデルを追いかけることより、「自社のどの業務から試し、どう測り、どう広げるか」を決めるほうが先です。進め方の型は[中小企業がAI導入で最初にやるべき5つのステップ](https://ai.sanvia.co.jp/articles/first-steps)に、業務別の使いどころは[業務別・生成AIの活用アイデア集](https://ai.sanvia.co.jp/articles/use-cases-by-task)にまとめています。中小企業の導入率や、使っていない理由についての調査の数字は、[統計まとめ](https://ai.sanvia.co.jp/stats/sme-genai)に出典つきで並べています。自社がどこから手をつけるとよいか迷う場合は、[AIみちしるべのAI導入診断](https://ai.sanvia.co.jp/diagnosis)（全8問・約3分、登録不要・無料）で現状を整理できます。
 
 ## 参考資料
 

@@ -6,7 +6,7 @@ topics: ["claudecode", "claude", "llm", "cli", "python"]
 published: true
 ---
 
-Claude Code を `claude -p --output-format stream-json --verbose` で毎日自動実行していると、1実行につき数百行の JSON ログが溜まります。この記事では、その stream-json ログの**行の種類と各フィールドの意味**を公式ドキュメントで確認しながら、**完了した実行だけを抜き出して集計する小さな Python スクリプト**を作り、手元の実ログ 42 実行に対して実際に流した出力をそのまま載せます。数値はすべてこのスクリプトの出力から転記しています。
+Claude Code を `claude -p --output-format stream-json --verbose`（[非対話モード](https://ai.sanvia.co.jp/glossary#g-non-interactive-mode)）で毎日自動実行していると、1実行につき数百行の JSON ログが溜まります。この記事では、その stream-json ログの**行の種類と各フィールドの意味**を公式ドキュメントで確認しながら、**完了した実行だけを抜き出して集計する小さな Python スクリプト**を作り、手元の実ログ 42 実行に対して実際に流した出力をそのまま載せます。数値はすべてこのスクリプトの出力から転記しています。
 
 ![積み上げられた薪の木口が多数並ぶ写真。大小さまざまな丸太の断面がぎっしり詰まっている。多数の実行ログ（英語でlog＝丸太）を1本ずつ数え、断面＝1回の実行結果を見比べて集計することのメタファー](/images/cc-headless-logs/hero-bbd2ed64f7.jpg)
 

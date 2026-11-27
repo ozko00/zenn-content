@@ -6,7 +6,7 @@ topics: ["codex", "openai", "jsonschema", "python", "llm"]
 published: true
 ---
 
-架空の見積書・請求書10件から10項目を抜き出す作業を、Codex CLI の `codex exec` で3条件×2回（計60回）回しました。項目の正答率は98.0〜99.0%で、間違いは2件の書類の「期限」と「登録番号」だけでした。JSON Schema 指定（`--output-schema`）の有無では、今回の60回に限ると JSON の壊れも正答率の差もほとんど出ていません。
+架空の見積書・請求書10件から10項目を抜き出す作業を、Codex CLI の `codex exec`（[非対話モード](https://ai.sanvia.co.jp/glossary#g-non-interactive-mode)）で3条件×2回（計60回）回しました。項目の正答率は98.0〜99.0%で、間違いは2件の書類の「期限」と「登録番号」だけでした。JSON Schema 指定（`--output-schema`）の有無では、今回の60回に限ると JSON の壊れも正答率の差もほとんど出ていません。
 
 ![古い木枠のふるいが掘り返した黒い土の上に置かれ、金網の上に小石がいくつかだけ残り、細かい土は下に落ちている写真。書類の文字の山から必要な項目だけを取り出して確かめる作業のメタファー](/images/codex-invoice-extract/hero-9c9d6fe9e5.jpg)
 

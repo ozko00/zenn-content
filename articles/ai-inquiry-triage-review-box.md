@@ -150,7 +150,7 @@ C の「人に回せた回数」は `needs_human` が true だった回数です
 - 各条件は2回ずつです。2回で結果が割れたのは、条件 B の gpt-6-luna（漏水のメール）と条件 C の gpt-6-luna（内見＋値下げ交渉）・gpt-6.1-terra（退去予定＋土地の売却で category が割れた。`needs_human` は2回とも true）の3か所でした。回数を増やすと割合は動きます。
 - Codex CLI 経由の結果です。API で同じスキーマを使った場合は確かめていません。
 
-不動産会社の業務で ChatGPT を使うときの依頼文の例と確認ルールは、[不動産会社のChatGPT活用｜7業務のプロンプト例と確認ルール](https://ai.sanvia.co.jp/articles/chatgpt-real-estate)にまとめています。
+不動産会社の業務で ChatGPT を使うときの依頼文の例と確認ルールは、[不動産会社のChatGPT活用｜7業務のプロンプト例と確認ルール](https://ai.sanvia.co.jp/articles/chatgpt-real-estate)にまとめています。そちらの記事の実行記録は、[AI検証データ集](https://ai.sanvia.co.jp/data)で公開しています。
 
 ## 参考資料
 

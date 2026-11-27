@@ -16,7 +16,7 @@ OpenAI が 2026-09-11 の開発者ブログで書いた「スキルの descripti
 
 元記事は OpenAI Developers ブログの [Rethinking skills and prompts for GPT-6 Astra](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra) です（ページ表示の日付 2026-09-11、取得日 2026-10-27）。モデルが賢くなった今、これまでに溜めたスキル・`AGENTS.md`・プロンプトを見直そう、という内容です。
 
-スキルについての主張は次の3点です。
+スキルについての主張は次の3点です（スキルと `SKILL.md` の定義は[用語集の Agent Skills](https://ai.sanvia.co.jp/glossary#g-agent-skills)を見てください）。
 
 1. description は、いつ使うべきかが分かる範囲で、できるだけ短くする。原文は "skill descriptions should be as short as possible while making it clear when the model should use them"。
 2. 複数のワークフローを持つスキルは、ルートの文書を最小限の振り分け役にして、詳細は別の文書やスクリプトに置く（progressive disclosure）。

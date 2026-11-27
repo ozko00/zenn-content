@@ -194,6 +194,8 @@ ok = any(all(any(norm(t) in line for t in grp) for grp in f["any"])
 - モデルは2つ、各条件48回です。C の0/288は、この8本と2モデルでの結果です。
 - E は D と比べて「1行1件の形」「記載なしと書く」「雑談を入れない」の3点が違います。どれが効いたかは分けていません。
 
+営業報告と会議の文字起こしで別に24回試した結果と、要約の依頼文の例は、サイトの記事「[ChatGPTで要約する方法](https://ai.sanvia.co.jp/articles/chatgpt-summary)」にまとめています。
+
 ## 参考資料
 
 - Codex CLI（OpenAI）: https://developers.openai.com/codex/cli

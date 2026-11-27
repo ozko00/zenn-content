@@ -144,3 +144,5 @@ files = glob.glob(os.path.expanduser("~/.claude/projects/*/**/*.jsonl"), recursi
 Claude Code の利用枠を節約したいなら、まず**何に使っているかを JSONL から数える**のが早いです。そのとき `message.id` で重複を除かないと、2倍以上に多く見えることがあります。
 
 私の場合は、書く仕事を外してコードの変更だけを頼むようにしたところ、2週間で出力トークンが約140分の1になりました。残った呼び出しの半分は「一覧に1行足す」だけだったので、次はその一覧をコードから出すつもりです。
+
+Claude Code の設定や費用をサイトで実測した記事は、[AIコーディングツールの記事一覧](https://ai.sanvia.co.jp/articles/category/ai-coding-tools)にまとめています。

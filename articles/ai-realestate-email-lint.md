@@ -88,7 +88,7 @@ published: true
 | L7 形式 | `**`・「〇〇」・「○○」 |
 | L8 取引の種類 | 賃貸なのに「売主」、売買なのに「貸主」「大家」「家賃」 |
 
-6種類の言葉の一覧と条文の出典は、サイトの記事「[不動産の物件紹介文をAIで作る](https://ai.sanvia.co.jp/articles/ai-property-description)」の「根拠がないと使えない言葉（6種類）」の表にまとめています。
+6種類の言葉の一覧と条文の出典は、サイトの記事「[不動産の物件紹介文をAIで作る](https://ai.sanvia.co.jp/articles/ai-property-description)」の「根拠がないと使えない言葉（6種類）」の表にまとめています。おとり広告や徒歩所要時間など、表示規約のほかの用語の定義と条文は[用語集](https://ai.sanvia.co.jp/glossary#g-otori-kokoku)にあります。
 
 中心の部分を、読みやすく整理したものです（実験で使った全体は約60行）。
 

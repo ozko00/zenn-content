@@ -183,6 +183,8 @@ codex exec --json --ephemeral --skip-git-repo-check --ignore-user-config \
 
 実験3 shared の各回のコミット数は 4・5・5・5・4件。worktree の CHANGELOG 衝突は、1回目 t2、2回目 t2・t3・t4、3回目 t3・t4、4回目なし、5回目 t2・t3・t4 でした。
 
+なお、この記事の「並列」は、エージェントを別々のプロセスとして同時に動かす場合の話です。Claude Code の中で作業を分ける「サブエージェント」の定義と出典は、[用語集](https://ai.sanvia.co.jp/glossary#g-subagent)にまとめています。
+
 ---
 
 著者: Kosuke（[プロフィール](https://ai.sanvia.co.jp/authors/kosuke)）。AI とデータサイエンスを学び、不動産・教育の現場で AI の導入を支援しています。
